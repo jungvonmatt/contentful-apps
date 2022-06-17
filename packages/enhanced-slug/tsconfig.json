@@ -1,0 +1,12 @@
+{
+  "extends": "@tsconfig/create-react-app/tsconfig.json",
+  "compilerOptions": {
+    "target": "es5",
+    "strict": false,
+    "lib": ["dom", "dom.iterable", "esnext"]
+  },
+  "include": ["src"],
+  "paths": {
+    "*": ["src/*", "node_modules/*"]
+  }
+}
