@@ -26,6 +26,7 @@ export interface Domain {
 export interface AppInstallationParameters {
   domains: Domain[];
   parentFieldId?: string;
+  slugFieldId?: string;
 }
 
 const ConfigScreen = () => {
@@ -195,6 +196,18 @@ const ConfigScreen = () => {
         <Paragraph>
           This is required to compute the URL path
         </Paragraph>
+        <FormControl>
+          {/* <FormControl.Label>Parent reference field</FormControl.Label> */}
+          <TextInput
+            value={parameters.parentFieldId}
+            type="text"
+            name="slugFieldId"
+            placeholder="slug"
+            onChange={(e) =>
+              setParameters({ ...parameters, slugFieldId: e.target.value })
+            }
+          />
+        </FormControl>
         <FormControl>
           {/* <FormControl.Label>Parent reference field</FormControl.Label> */}
           <TextInput

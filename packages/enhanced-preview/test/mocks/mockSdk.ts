@@ -7,6 +7,13 @@ const mockSdk: any = {
   },
   ids: {
     app: 'test-app'
+  },
+  locales: {
+    default: 'en'
+  },
+  window: {
+    startAutoResizer:jest.fn(),
+    stopAutoResizer:jest.fn()
   }
 };
 

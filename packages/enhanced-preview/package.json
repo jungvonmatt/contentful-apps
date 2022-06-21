@@ -1,5 +1,5 @@
 {
-  "name": "@jungvonmatt/enhanced-slug",
+  "name": "@jungvonmatt/enhanced-preview",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -9,6 +9,7 @@
     "@contentful/field-editor-shared": "^1.1.2",
     "@contentful/field-editor-slug": "^1.1.2",
     "@contentful/react-apps-toolkit": "1.1.0",
+    "contentful": "^9.1.32",
     "contentful-management": "10.6.2",
     "emotion": "10.0.27",
     "react": "17.0.2",
