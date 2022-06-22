@@ -22,20 +22,13 @@ type Url = {
   url: string;
 };
 
-type Paths = {
-  dev: string;
-  prod: string;
-};
-
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
   const { getParentsDev, getParentsProd } = useParents();
   const [urls, setUrls] = useState<Url[]>([]);
-  const page = useContainingPage(sdk.ids.entry);
-  const [paths, setPaths] = useState<Paths>({
-    dev: "",
-    prod: "",
-  });
+  const page = useContainingPage();
+  const [pathDev, setPathDev] = useState<string>("");
+  const [pathProd, setPathProd] = useState<string>("");
 
   const parameters = sdk?.parameters?.installation as AppInstallationParameters;
   const domains = parameters.domains;
@@ -51,7 +44,7 @@ const Sidebar = () => {
   const prodParentPageId = prodParentPageValue?.sys?.id;
 
   const sys = sdk.entry.getSys();
-  const isPage = pageId === sys.id;
+  const isPage = sys.contentType.sys.id === "page" || pageId === sys.id;
   const valid = isPublished({ sys }) || isChanged({ sys });
 
   const [slugValueDev, setSlugValueDev] = useState<string>(slug);
@@ -80,9 +73,9 @@ const Sidebar = () => {
           (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
         );
 
-        setPaths((paths) => ({ ...paths, dev: [...slugs].join("/") }));
+        setPathDev([...slugs].join("/"));
       } else if (isPage) {
-        setPaths((paths) => ({ ...paths, dev: "" }));
+        setPathDev("");
       }
     })();
   }, [getParentsDev, isPage, parentPageId, sdk.locales.default, slugFieldId]);
@@ -96,9 +89,9 @@ const Sidebar = () => {
           (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
         );
 
-        setPaths((paths) => ({ ...paths, prod: [...slugs].join("/") }));
+        setPathProd([...slugs].join("/"));
       } else if (isPage) {
-        setPaths((paths) => ({ ...paths, prod: "" }));
+        setPathProd("");
       }
     })();
   }, [
@@ -111,31 +104,32 @@ const Sidebar = () => {
 
   // handle prod/dev when sidebar is not used on page
   useEffect(() => {
-    (async () => {
-      if (pageId && !isPage) {
-        const parentsDev = await getParentsDev(pageId);
-        const parentsProd = valid ? await getParentsProd(pageId) : [];
-
+    if (pageId && !isPage) {
+      getParentsDev(pageId).then((parentsDev) => {
         const slugsDev = parentsDev.map(
           (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
         );
-        const slugsProd = parentsProd.map(
-          (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
-        );
 
-        setPaths({
-          dev: slugsDev?.slice(0, -1)?.join("/") ?? "",
-          prod: valid ? slugsProd?.slice(0, -1)?.join("/") ?? "" : "",
-        });
-
+        setPathDev(slugsDev?.slice(0, -1)?.join("/") ?? "");
         setSlugValueDev(slugsDev?.slice(-1)?.[0]);
-        if (valid) {
+      });
+
+      if (valid) {
+        getParentsProd(pageId).then((parentsProd) => {
+          const slugsProd = parentsProd.map(
+            (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
+          );
+
+          setPathProd(slugsProd?.slice(0, -1)?.join("/") ?? "");
           setSlugValueProd(slugsProd?.slice(-1)?.[0]);
-        }
-      } else if (!isPage) {
-        setPaths({ dev: "", prod: "" });
+        });
       }
-    })();
+    } else if (!isPage) {
+      setPathDev("");
+      setSlugValueDev("");
+      setPathProd("");
+      setSlugValueProd("");
+    }
   }, [
     getParentsDev,
     getParentsProd,
@@ -149,12 +143,11 @@ const Sidebar = () => {
   useEffect(() => {
     setUrls(
       domains.map((data) => {
-        const path = data.isPreview ? paths.dev : paths.prod;
+        const path = data.isPreview ? pathDev : pathProd;
+        const slug = data.isPreview ? slugValueDev : slugValueProd;
         const domain = data.domain.endsWith("/")
           ? data.domain.slice(0, -1)
           : data.domain;
-
-        const slug = data.isPreview ? slugValueDev : slugValueProd;
 
         const url =
           path || slug
@@ -167,7 +160,7 @@ const Sidebar = () => {
         };
       })
     );
-  }, [domains, paths.dev, paths.prod, slugValueDev, slugValueProd]);
+  }, [domains, pathDev, pathProd, slugValueDev, slugValueProd]);
 
   return (
     <Stack flexDirection="column" alignItems="stretch">

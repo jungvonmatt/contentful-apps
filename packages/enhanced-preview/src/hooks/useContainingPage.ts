@@ -1,47 +1,63 @@
-import { Entry } from "@contentful/app-sdk";
-import { useCMA } from "@contentful/react-apps-toolkit";
-import { KeyValueMap } from "contentful-management";
-import { useEffect, useState } from "react";
+import { EntryAPI, SidebarExtensionSDK } from "@contentful/app-sdk";
+import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
+import { EntryProps, KeyValueMap, Link } from "contentful-management";
+import { useEffect, useRef, useState } from "react";
 
-export const useContainingPage = (entryId: string) => {
+type PageEntry = EntryProps<KeyValueMap>;
+
+const convertEntryApi = (entry: EntryAPI): EntryProps<KeyValueMap> => {
+  const sys = entry.getSys();
+  return {
+    fields: entry.fields,
+    metadata: entry.getMetadata(),
+    sys: {
+      ...sys,
+      publishedBy: sys.publishedBy as Link<"User">,
+    },
+  };
+};
+
+export const useContainingPage = () => {
   const cma = useCMA();
+  const sdk = useSDK<SidebarExtensionSDK>();
 
-  const [parent, setParent] = useState<Entry<KeyValueMap>>();
+  const entryRef = useRef(sdk.entry);
+
+  const [parent, setParent] = useState<PageEntry>();
 
   useEffect(() => {
-    const findParentPage = async (id: string, depth: number = 10) => {
-      const current = await cma.entry.get({ entryId: id });
-      if (current?.sys?.contentType?.sys?.id === "page") {
-        return current;
+    const findContainingPage = async (
+      entry: EntryProps<KeyValueMap>,
+      depth: number = 10
+    ): Promise<EntryProps<KeyValueMap>> => {
+      if (entry?.sys?.contentType?.sys?.id === "page") {
+        return entry;
       }
 
-      if (depth <= 0) {
+      if (depth < 0 || !entry?.sys?.id) {
         return undefined;
       }
 
-      const entries = await cma.entry.getMany({
-        query: { links_to_entry: id },
-      });
+      try {
+        const next = await cma.entry.getMany({
+          query: { links_to_entry: entry.sys.id, limit: 1 },
+        });
 
-      for (const node of entries?.items ?? []) {
-        if (node.sys.contentType.sys.id === "page") {
-          return node;
-        }
+        const [node] = next?.items ?? [];
 
-        const parentNode = await findParentPage(node.sys.id, depth - 1);
-
-        if (parentNode) {
-          return parentNode;
-        }
+        return findContainingPage(node, depth - 1);
+      } catch {
+        return undefined;
       }
     };
+
     (async () => {
-      const node = await findParentPage(entryId);
+      const node = await findContainingPage(convertEntryApi(entryRef.current));
       if (node) {
         setParent(node);
       }
     })();
-  }, [cma, entryId]);
+  }, [cma]);
 
   return parent;
 };

@@ -152,18 +152,18 @@ const ConfigScreen = () => {
                 size="small"
                 type="text"
                 name="name"
-                value={data.name || ''}
+                value={data.name || ""}
                 onChange={(e) => setDomainValue(index, "name", e.target.value)}
                 onBlur={() => addEmpty()}
               />
             </FormControl>
-            <FormControl >
+            <FormControl>
               <FormControl.Label>Domain</FormControl.Label>
               <TextInput
                 size="small"
                 type="text"
                 name="domain"
-                value={data.domain || ''}
+                value={data.domain || ""}
                 onChange={(e) =>
                   setDomainValue(index, "domain", e.target.value)
                 }
@@ -177,7 +177,7 @@ const ConfigScreen = () => {
                 type="text"
                 name="ending"
                 placeholder=""
-                value={data.ending || ''}
+                value={data.ending || ""}
                 onChange={(e) =>
                   setDomainValue(index, "ending", e.target.value)
                 }

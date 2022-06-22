@@ -1,4 +1,4 @@
-import { EditorExtensionSDK, EntryAPI } from "@contentful/app-sdk";
+import { SidebarExtensionSDK, EntryAPI } from "@contentful/app-sdk";
 import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 import { EntryProps, KeyValueMap } from "contentful-management";
 import { useEffect, useState } from "react";
@@ -6,7 +6,7 @@ import { isChanged, isPublished } from "../lib/checks";
 
 export const useSnapshot = () => {
   const cma = useCMA();
-  const sdk = useSDK<EditorExtensionSDK>();
+  const sdk = useSDK<SidebarExtensionSDK>();
 
   const sys = sdk.entry.getSys();
   const [entry, setEntry] = useState<EntryAPI | EntryProps<KeyValueMap>>(
