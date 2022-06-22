@@ -14,6 +14,7 @@ import { useContainingPage } from "../hooks/useContainingPage";
 import { useLooseFieldValue } from "../hooks/useLooseFieldValue";
 import { useParents } from "../hooks/useParents";
 import { useSnapshotValue } from "../hooks/useSnapshot";
+import { isChanged, isPublished } from "../lib/checks";
 import { AppInstallationParameters } from "./ConfigScreen";
 
 type Url = {
@@ -28,7 +29,7 @@ type Paths = {
 
 const Sidebar = () => {
   const sdk = useSDK<SidebarExtensionSDK>();
-  const { getParentValues, getParentsDev, getParentsProd } = useParents();
+  const { getParentsDev, getParentsProd } = useParents();
   const [urls, setUrls] = useState<Url[]>([]);
   const page = useContainingPage(sdk.ids.entry);
   const [paths, setPaths] = useState<Paths>({
@@ -44,15 +45,17 @@ const Sidebar = () => {
 
   const [slug] = useLooseFieldValue<string>(slugFieldId);
   const [parentPageValue] = useLooseFieldValue<Link>(parentFieldId);
-  const prodSlug = useSnapshotValue(sdk.ids.entry, slugFieldId);
-  const prodParentPageValue = useSnapshotValue<Link>(
-    sdk.ids.entry,
-    parentFieldId
-  );
+  const prodSlug = useSnapshotValue(slugFieldId);
+  const prodParentPageValue = useSnapshotValue<Link>(parentFieldId);
   const parentPageId = parentPageValue?.sys?.id;
   const prodParentPageId = prodParentPageValue?.sys?.id;
 
-  const isPage = pageId === sdk.entry.getSys().id;
+  const sys = sdk.entry.getSys();
+  const isPage = pageId === sys.id;
+  const valid = isPublished({ sys }) || isChanged({ sys });
+
+  const [slugValueDev, setSlugValueDev] = useState<string>(slug);
+  const [slugValueProd, setSlugValueProd] = useState<string>(prodSlug);
 
   useEffect(() => {
     sdk.window.startAutoResizer();
@@ -61,68 +64,110 @@ const Sidebar = () => {
   }, [sdk.window]);
 
   useEffect(() => {
+    setSlugValueDev(slug);
+  }, [slug]);
+
+  useEffect(() => {
+    setSlugValueProd(prodSlug);
+  }, [prodSlug]);
+
+  // handle dev when sidebar is used on page
+  useEffect(() => {
     (async () => {
-      if (isPage) {
-        const parentPagesDev = parentPageId
-          ? await getParentsDev(parentPageId)
-          : [];
-        const parentPagesProd = prodParentPageId
-          ? await getParentsProd(prodParentPageId)
-          : [];
-
-        const slugsDev = parentPagesDev.map(
-          (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
-        );
-        const slugsProd = parentPagesProd.map(
+      if (parentPageId) {
+        const parents = await getParentsDev(parentPageId);
+        const slugs = parents.map(
           (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
         );
 
-        const result: Paths = {
-          dev: parentPageId ? [...slugsDev, slug].join("/") : slug,
-          prod: "",
-        };
+        setPaths((paths) => ({ ...paths, dev: [...slugs].join("/") }));
+      } else if (isPage) {
+        setPaths((paths) => ({ ...paths, dev: "" }));
+      }
+    })();
+  }, [getParentsDev, isPage, parentPageId, sdk.locales.default, slugFieldId]);
 
-        if (!prodParentPageId) {
-          result.prod = prodSlug || "";
-        } else if (slugsProd.length && prodSlug) {
-          result.prod = [...slugsProd, prodSlug].join("/");
-        }
-        setPaths(result);
-      } else if (pageId) {
-        const slugs = await getParentValues(pageId, slugFieldId);
+  // handle dev when sidebar is used on page
+  useEffect(() => {
+    (async () => {
+      if (prodParentPageId) {
+        const parents = await getParentsProd(prodParentPageId);
+        const slugs = parents.map(
+          (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
+        );
 
-        setPaths({
-          dev: slugs?.dev?.join("/") ?? "",
-          prod: slugs?.prod?.join("/") ?? "",
-        });
+        setPaths((paths) => ({ ...paths, prod: [...slugs].join("/") }));
+      } else if (isPage) {
+        setPaths((paths) => ({ ...paths, prod: "" }));
       }
     })();
   }, [
-    getParentValues,
+    getParentsProd,
+    isPage,
+    prodParentPageId,
+    sdk.locales.default,
+    slugFieldId,
+  ]);
+
+  // handle prod/dev when sidebar is not used on page
+  useEffect(() => {
+    (async () => {
+      if (pageId && !isPage) {
+        const parentsDev = await getParentsDev(pageId);
+        const parentsProd = valid ? await getParentsProd(pageId) : [];
+
+        const slugsDev = parentsDev.map(
+          (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
+        );
+        const slugsProd = parentsProd.map(
+          (node) => node?.fields?.[slugFieldId]?.[sdk.locales.default]
+        );
+
+        setPaths({
+          dev: slugsDev?.slice(0, -1)?.join("/") ?? "",
+          prod: valid ? slugsProd?.slice(0, -1)?.join("/") ?? "" : "",
+        });
+
+        setSlugValueDev(slugsDev?.slice(-1)?.[0]);
+        if (valid) {
+          setSlugValueProd(slugsProd?.slice(-1)?.[0]);
+        }
+      } else if (!isPage) {
+        setPaths({ dev: "", prod: "" });
+      }
+    })();
+  }, [
     getParentsDev,
     getParentsProd,
     isPage,
     pageId,
-    parentPageId,
-    prodParentPageId,
-    prodSlug,
     sdk.locales.default,
-    slug,
     slugFieldId,
+    valid,
   ]);
 
   useEffect(() => {
     setUrls(
       domains.map((data) => {
         const path = data.isPreview ? paths.dev : paths.prod;
-        const url = path ? [data.domain, path].join("/") : "";
+        const domain = data.domain.endsWith("/")
+          ? data.domain.slice(0, -1)
+          : data.domain;
+
+        const slug = data.isPreview ? slugValueDev : slugValueProd;
+
+        const url =
+          path || slug
+            ? [domain, path, slug].filter((v) => v).join("/") +
+              (data.ending || "")
+            : "";
         return {
           name: data.name,
           url,
         };
       })
     );
-  }, [domains, paths.dev, paths.prod]);
+  }, [domains, paths.dev, paths.prod, slugValueDev, slugValueProd]);
 
   return (
     <Stack flexDirection="column" alignItems="stretch">

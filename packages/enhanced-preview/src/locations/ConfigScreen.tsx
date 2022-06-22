@@ -5,7 +5,6 @@ import {
   Form,
   FormControl,
   Heading,
-  SectionHeading,
   Subheading,
   TextInput,
   Checkbox,
@@ -21,6 +20,7 @@ export interface Domain {
   domain?: string;
   name?: string;
   isPreview?: boolean;
+  ending?: string;
 }
 
 export interface AppInstallationParameters {
@@ -32,6 +32,8 @@ export interface AppInstallationParameters {
 const ConfigScreen = () => {
   const [parameters, setParameters] = useState<AppInstallationParameters>({
     domains: [],
+    slugFieldId: "slug",
+    parentFieldId: "parent_page",
   });
 
   const [domains, setDomains] = useState<Domain[]>([]);
@@ -83,11 +85,13 @@ const ConfigScreen = () => {
         setParameters(currentParameters);
       }
 
-      if (currentParameters.domains) {
+      if (currentParameters?.domains) {
         setDomains([
           ...(currentParameters?.domains ?? []),
-          { domain: "", name: "", isPreview: false },
+          { domain: "", name: "", ending: "", isPreview: false },
         ]);
+      } else {
+        setDomains([{ domain: "", name: "", ending: "", isPreview: false }]);
       }
 
       // Once preparation has finished, call `setReady` to hide
@@ -103,7 +107,7 @@ const ConfigScreen = () => {
     if (last.domain && last.name) {
       setDomains((domains) => [
         ...domains,
-        { domain: "", name: "", isPreview: false },
+        { domain: "", name: "", ending: "", isPreview: false },
       ]);
     }
   };
@@ -148,36 +152,49 @@ const ConfigScreen = () => {
                 size="small"
                 type="text"
                 name="name"
-                value={data.name}
+                value={data.name || ''}
                 onChange={(e) => setDomainValue(index, "name", e.target.value)}
                 onBlur={() => addEmpty()}
               />
             </FormControl>
-            <FormControl>
+            <FormControl >
               <FormControl.Label>Domain</FormControl.Label>
               <TextInput
                 size="small"
                 type="text"
                 name="domain"
-                value={data.domain}
+                value={data.domain || ''}
                 onChange={(e) =>
                   setDomainValue(index, "domain", e.target.value)
                 }
                 onBlur={() => addEmpty()}
               />
             </FormControl>
-            <Checkbox.Group name="checkbox-options">
-              <Checkbox
-                name="isPreview"
-                isChecked={data.isPreview}
-                label="Use preview API"
-                onChange={() =>
-                  setDomainValue(index, "isPreview", !data.isPreview)
+            <FormControl style={{ maxWidth: "80px" }}>
+              <FormControl.Label>Ending</FormControl.Label>
+              <TextInput
+                size="small"
+                type="text"
+                name="ending"
+                placeholder=""
+                value={data.ending || ''}
+                onChange={(e) =>
+                  setDomainValue(index, "ending", e.target.value)
                 }
-              >
-                Use preview API
-              </Checkbox>
-            </Checkbox.Group>
+                onBlur={() => addEmpty()}
+              />
+            </FormControl>
+            <Checkbox
+              name={"isPreview"}
+              isChecked={data.isPreview}
+              // defaultChecked={data.isPreview}
+              label="Use preview API"
+              onChange={() =>
+                setDomainValue(index, "isPreview", !data.isPreview)
+              }
+            >
+              Use preview API
+            </Checkbox>
             {index < domains.length - 1 && (
               <IconButton
                 variant="transparent"
@@ -191,25 +208,11 @@ const ConfigScreen = () => {
           </Stack>
         ))}
         <Subheading marginBottom="none" marginTop="spacingM">
-        Parent reference field
+          Field settings
         </Subheading>
-        <Paragraph>
-          This is required to compute the URL path
-        </Paragraph>
+        <Paragraph>These are required to compute the URL path</Paragraph>
         <FormControl>
-          {/* <FormControl.Label>Parent reference field</FormControl.Label> */}
-          <TextInput
-            value={parameters.parentFieldId}
-            type="text"
-            name="slugFieldId"
-            placeholder="slug"
-            onChange={(e) =>
-              setParameters({ ...parameters, slugFieldId: e.target.value })
-            }
-          />
-        </FormControl>
-        <FormControl>
-          {/* <FormControl.Label>Parent reference field</FormControl.Label> */}
+          <FormControl.Label>Parent reference field id</FormControl.Label>
           <TextInput
             value={parameters.parentFieldId}
             type="text"
@@ -217,6 +220,18 @@ const ConfigScreen = () => {
             placeholder="parent_page"
             onChange={(e) =>
               setParameters({ ...parameters, parentFieldId: e.target.value })
+            }
+          />
+        </FormControl>
+        <FormControl>
+          <FormControl.Label>Slug field id</FormControl.Label>
+          <TextInput
+            value={parameters.slugFieldId}
+            type="text"
+            name="slugFieldId"
+            placeholder="slug"
+            onChange={(e) =>
+              setParameters({ ...parameters, slugFieldId: e.target.value })
             }
           />
         </FormControl>

@@ -8,6 +8,7 @@ import { useParents } from "../hooks/useParents";
 const Field = () => {
   const sdk = useSDK<FieldExtensionSDK>();
   const [value, setValue] = useState<string>(sdk.field.getValue());
+  const [slugs, setSlugs] = useState<string[]>();
   const [url, setUrl] = useState<string>();
   const [parent] = useFieldValue<Link>("parent_page");
   const { getParentsDev } = useParents();
@@ -32,15 +33,24 @@ const Field = () => {
   useEffect(() => {
     (async () => {
       const parents = parentId ? await getParentsDev(parentId) : [];
-      const slugs = parents.map(
-        (parent) => parent?.fields?.[sdk.field.id]?.[sdk.field.locale]
-      );
 
+      setSlugs(
+        parents.map(
+          (parent) => parent?.fields?.[sdk.field.id]?.[sdk.field.locale]
+        )
+      );
+    })();
+  }, [getParentsDev, parentId, sdk.field.id, sdk.field.locale]);
+
+  useEffect(() => {
+    (async () => {
       if (value && Array.isArray(slugs)) {
         setUrl(`/${[...slugs, value].join("/")}`);
+      } else if (value) {
+        setUrl(`/${value}`);
       }
     })();
-  }, [getParentsDev, parentId, sdk.field.id, sdk.field.locale, value]);
+  }, [slugs, value]);
 
   const uniqueQueryFilter = useMemo(() => {
     if (parentId) {

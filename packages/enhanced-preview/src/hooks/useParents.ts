@@ -1,7 +1,8 @@
 import { Link } from "@contentful/app-sdk";
-import { useCMA, useFieldValue, useSDK } from "@contentful/react-apps-toolkit";
-import { EntryProps, KeyValueMap, PlainClientAPI } from "contentful-management";
+import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
+import { EntryProps, KeyValueMap } from "contentful-management";
 import { useCallback } from "react";
+import { isChanged, isPublished } from "../lib/checks";
 import { AppInstallationParameters } from "../locations/ConfigScreen";
 
 export const useParents = () => {
@@ -40,18 +41,33 @@ export const useParents = () => {
     [cma.entry, parentFieldId, sdk.ids.environment, sdk.locales.default]
   );
 
+  const getPublishedEntry = useCallback(
+    async (entryId: string) => {
+      let entry = await cma.entry.get({ entryId });
+
+      if (isPublished(entry)) {
+        return entry;
+      }
+
+      if (isChanged(entry)) {
+        const snapshot = await cma.snapshot.getManyForEntry({
+          entryId,
+        });
+
+        return snapshot?.items?.[snapshot?.items?.length - 1]?.snapshot;
+      }
+    },
+    [cma.entry, cma.snapshot]
+  );
+
   const getParentsProd = useCallback(
     async (entryId: string): Promise<Array<EntryProps<KeyValueMap>>> => {
-      const snapshot = await cma.snapshot.getManyForEntry({
-        entryId,
-      });
+      const entry = await getPublishedEntry(entryId);
 
-      const items = snapshot?.items ?? [];
-      if (!items.length) {
+      if (!entry) {
         return [];
       }
 
-      const entry = items?.[items.length - 1]?.snapshot;
       const parentLink: Link =
         entry?.fields?.[parentFieldId]?.[sdk.locales.default];
 
@@ -59,16 +75,8 @@ export const useParents = () => {
         return [entry];
       }
 
-      const parentSnapshot = await cma.snapshot.getManyForEntry({
-        entryId: parentLink.sys.id,
-      });
+      const parent = await getPublishedEntry(parentLink.sys.id);
 
-      const parentItems = parentSnapshot?.items ?? [];
-      if (!parentItems.length) {
-        return [entry];
-      }
-
-      const parent = parentItems?.[parentItems.length - 1]?.snapshot;
       if (!parent) {
         return [entry];
       }
@@ -81,7 +89,7 @@ export const useParents = () => {
 
       return [];
     },
-    [cma.snapshot, parentFieldId, sdk.locales.default]
+    [getPublishedEntry, parentFieldId, sdk.locales.default]
   );
 
   const getParentValues = useCallback(

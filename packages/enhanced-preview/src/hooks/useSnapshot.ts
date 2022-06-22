@@ -1,51 +1,51 @@
+import { EditorExtensionSDK, EntryAPI } from "@contentful/app-sdk";
 import { useCMA, useSDK } from "@contentful/react-apps-toolkit";
 import { EntryProps, KeyValueMap } from "contentful-management";
 import { useEffect, useState } from "react";
+import { isChanged, isPublished } from "../lib/checks";
 
-export const useSnapshot = (entryId: string) => {
+export const useSnapshot = () => {
   const cma = useCMA();
-  const sdk = useSDK();
+  const sdk = useSDK<EditorExtensionSDK>();
 
-  const [entry, setEntry] = useState<EntryProps<KeyValueMap>>();
+  const sys = sdk.entry.getSys();
+  const [entry, setEntry] = useState<EntryAPI | EntryProps<KeyValueMap>>(
+    isPublished({ sys }) ? sdk.entry : undefined
+  );
 
   useEffect(() => {
-    (async () => {
-      const snapshot = await cma.snapshot.getManyForEntry({
-        entryId,
-        environmentId: sdk.ids.environment,
-      });
+    sdk.entry.onSysChanged((sys) => {
+      const state = isPublished({ sys })
+        ? "published"
+        : isChanged({ sys })
+        ? "changed"
+        : "";
 
-      if (snapshot.items.length) {
-        setEntry(snapshot.items[snapshot.items.length - 1].snapshot);
+      if (state === "published") {
+        cma.entry.get({ entryId: sys.id }).then((entry) => {
+          setEntry(entry);
+        });
+      } else if (state === "") {
+        setEntry(undefined);
       }
-    })();
-  }, [cma.snapshot, entryId, sdk.ids.environment]);
+    });
+
+    if (isChanged({ sys })) {
+      cma.snapshot.getManyForEntry({ entryId: sys.id }).then(({ items }) => {
+        if (items?.length) {
+          const entry = items[items.length - 1].snapshot;
+          setEntry(entry);
+        }
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return entry;
 };
 
-export const useSnapshotValue = <T = any>(
-  entryId: string,
-  fieldId: string
-): T => {
-  const cma = useCMA();
+export const useSnapshotValue = <T = any>(fieldId: string): T => {
   const sdk = useSDK();
+  const entry = useSnapshot();
 
-  const [value, setValue] = useState<T>();
-
-  useEffect(() => {
-    (async () => {
-      const snapshot = await cma.snapshot.getManyForEntry({
-        entryId,
-        environmentId: sdk.ids.environment,
-      });
-
-      if (snapshot.items.length) {
-        const entry = snapshot.items[snapshot.items.length - 1].snapshot;
-        setValue(entry.fields?.[fieldId]?.[sdk.locales.default] as T);
-      }
-    })();
-  }, [cma.snapshot, entryId, sdk.ids.environment]);
-
-  return value;
+  return entry?.fields?.[fieldId]?.[sdk.locales.default] as T;
 };
