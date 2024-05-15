@@ -13,19 +13,26 @@ const Home = () => {
         src="https://images.ctfassets.net/kuie7ww395uo/4n79EgZfJ7O6UD62nzscuB/bb7ff2f05265d55f19bdd5bcbe58fcad/logo.jpg"
       />
       <Heading as="h1">This is the Home page for Hackathon Team Her</Heading>
-      <Heading as="h3">Motivation</Heading>
+      <Heading as="h2">Motivation</Heading>
+      <Paragraph>
+        We spend a lot of time on documentation. We repeat documenting in the
+        next project, for the next client, even if it is very similar to another
+        one. Whenever time and money are short, documentation seems to be the
+        first thing to skip.
+      </Paragraph>
+      <Heading as="h2">Problem</Heading>
       <Paragraph>
         We need documentation for every project we do. Every new client needs to
-        be onboarded to Contentful and the content types. Even if we work with
-        experienced content manager, we spend a lot of time on documentation. We
-        repeat documenting in the next project, for the next client, even if it
-        is very similar to another one. Whenever time and money are short,
-        documentation seems to be the first thing to skip. As it is however a
-        very simple and repetitive task, we automate it.
+        be onboarded to Contentful and the content types.
       </Paragraph>
-      <Heading as="h3">Usage</Heading>
+      <Heading as="h2">Solution</Heading>
       <Paragraph>
-        You can find the Documentation tab under each configured content.{" "}
+        Contentful App that adds a tab to choosen Content Types. On click it
+        sends the Content Type to the Open AI
+      </Paragraph>
+      <Heading as="h2">Usage</Heading>
+      <Paragraph>
+        You can find the Documentation tab under each configured content.
         <TextLink
           icon={<ExternalLinkIcon />}
           alignIcon="end"
