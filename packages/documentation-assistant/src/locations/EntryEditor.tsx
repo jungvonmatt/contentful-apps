@@ -1,18 +1,27 @@
-import React, { useState, useEffect } from "react";
 import { EditorAppSDK } from "@contentful/app-sdk";
-import { Heading, Paragraph, Notification } from "@contentful/f36-components";
+import {
+  DateTime,
+  Flex,
+  Heading,
+  Note,
+  Paragraph,
+  Spinner,
+  Stack,
+  Text,
+} from "@contentful/f36-components";
 import { WorkbenchContent } from "@contentful/f36-workbench";
 import { useSDK } from "@contentful/react-apps-toolkit";
 import OpenAI from "openai";
+import { useEffect, useState } from "react";
+import Table from "../components/Table";
 
 const Entry = () => {
   const sdk = useSDK<EditorAppSDK>();
-  const [documentation, setDocumentation] = useState("");
+
+  const [documentation, setDocumentation] = useState<Documentation>();
   const [error, setError] = useState("");
 
-  const contentType = sdk.contentType;
-
-  console.log(contentType);
+  const { contentType } = sdk;
 
   const fetchDocumentation = async () => {
     try {
@@ -44,7 +53,13 @@ const Entry = () => {
       console.log(response);
 
       if (response) {
-        setDocumentation(response.choices[0].message.content ?? "");
+        let plainResponse = response.choices[0].message.content;
+        if (plainResponse && plainResponse !== "") {
+          plainResponse = plainResponse
+            .replace("```json", "")
+            .replaceAll("```", "");
+        }
+        setDocumentation(JSON.parse(plainResponse ?? ""));
       } else {
         throw new Error("Failed to generate documentation");
       }
@@ -60,10 +75,23 @@ const Entry = () => {
   return (
     <WorkbenchContent type="default">
       <Heading as="h1">Documentation for {contentType.name}</Heading>
-      {error ? (
-        <Paragraph title="Error">{error}</Paragraph>
-      ) : (
-        <Paragraph>{documentation || "Loading documentation..."}</Paragraph>
+      {error && <Paragraph title="Error">{error}</Paragraph>}
+      {!documentation && (
+        <Flex justifyContent="center">
+          <Text marginRight="spacingXs">Loading</Text>
+          <Spinner />
+        </Flex>
+      )}
+      {documentation && (
+        <Stack flexDirection="column" alignItems="start">
+          <Note variant="neutral">
+            This documentation was generated on <DateTime date={Date.now()} />
+          </Note>
+          <Heading as="h2">Available Fields</Heading>
+          {documentation.fields.map((field) => (
+            <Table key={field.id} data={field} />
+          ))}
+        </Stack>
       )}
     </WorkbenchContent>
   );
