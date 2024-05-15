@@ -6,6 +6,12 @@ import { WorkbenchContent } from "@contentful/f36-workbench";
 const Home = () => {
   return (
     <WorkbenchContent type="default">
+      <img
+        alt='Team Her Logo"'
+        height="281px"
+        width="500px"
+        src="../../assets/logo.jpg"
+      />
       <Heading as="h1">This is the Home page for Hackathon Team Her</Heading>
       <Heading as="h3">Motivation</Heading>
       <Paragraph>
@@ -30,6 +36,12 @@ const Home = () => {
           Example
         </TextLink>
       </Paragraph>
+      <img
+        alt='Settings Documentation"'
+        height="450px"
+        width="800px"
+        src="../../assets/example1.png"
+      />
     </WorkbenchContent>
   );
 };

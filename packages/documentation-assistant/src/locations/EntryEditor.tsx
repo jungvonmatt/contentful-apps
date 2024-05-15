@@ -59,6 +59,11 @@ const Entry = () => {
             .replace("```json", "")
             .replaceAll("```", "");
         }
+        console.log(
+          "%c🚀 -> plainResponse",
+          "color: black; background: #a4cdf3; font-size: 14px",
+          plainResponse
+        );
         setDocumentation(JSON.parse(plainResponse ?? ""));
       } else {
         throw new Error("Failed to generate documentation");
@@ -76,7 +81,7 @@ const Entry = () => {
     <WorkbenchContent type="default">
       <Heading as="h1">Documentation for {contentType.name}</Heading>
       {error && <Paragraph title="Error">{error}</Paragraph>}
-      {!documentation && (
+      {error === "" && !documentation && (
         <Flex justifyContent="center">
           <Text marginRight="spacingXs">Loading</Text>
           <Spinner />
@@ -88,9 +93,10 @@ const Entry = () => {
             This documentation was generated on <DateTime date={Date.now()} />
           </Note>
           <Heading as="h2">Available Fields</Heading>
-          {documentation.fields.map((field) => (
-            <Table key={field.id} data={field} />
-          ))}
+          {documentation.fields &&
+            documentation.fields.map((field) => (
+              <Table key={field.id} data={field} />
+            ))}
         </Stack>
       )}
     </WorkbenchContent>
