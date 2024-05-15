@@ -59,11 +59,6 @@ const Entry = () => {
             .replace("```json", "")
             .replaceAll("```", "");
         }
-        console.log(
-          "%c🚀 -> plainResponse",
-          "color: black; background: #a4cdf3; font-size: 14px",
-          plainResponse
-        );
         setDocumentation(JSON.parse(plainResponse ?? ""));
       } else {
         throw new Error("Failed to generate documentation");
