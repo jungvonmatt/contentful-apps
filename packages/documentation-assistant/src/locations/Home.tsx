@@ -10,7 +10,7 @@ const Home = () => {
         alt='Team Her Logo"'
         height="281px"
         width="500px"
-        src="../../assets/logo.jpg"
+        src="https://images.ctfassets.net/kuie7ww395uo/4n79EgZfJ7O6UD62nzscuB/bb7ff2f05265d55f19bdd5bcbe58fcad/logo.jpg"
       />
       <Heading as="h1">This is the Home page for Hackathon Team Her</Heading>
       <Heading as="h3">Motivation</Heading>
@@ -40,7 +40,7 @@ const Home = () => {
         alt='Settings Documentation"'
         height="450px"
         width="800px"
-        src="../../assets/example1.png"
+        src="https://images.ctfassets.net/kuie7ww395uo/2IULh09ASqliTDsmOco1J8/9dbdc942062eefa20feca70cbc90623d/example1.png"
       />
     </WorkbenchContent>
   );
