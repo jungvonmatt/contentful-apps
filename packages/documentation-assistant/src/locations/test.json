@@ -1,0 +1,159 @@
+{
+  "sys": {
+    "space": {
+      "sys": {
+        "type": "Link",
+        "linkType": "Space",
+        "id": "kuie7ww395uo"
+      }
+    },
+    "id": "d-settings",
+    "type": "ContentType",
+    "createdAt": "2022-09-02T01:38:11.807Z",
+    "updatedAt": "2024-05-15T09:30:10.126Z",
+    "environment": {
+      "sys": {
+        "id": "hackathon-documentation-assist",
+        "type": "Link",
+        "linkType": "Environment"
+      }
+    },
+    "revision": 2,
+    "urn": "crn:contentful:::content:spaces/kuie7ww395uo/environments/hackathon-documentation-assist/content_types/d-settings"
+  },
+  "name": "Data: Settings",
+  "description": "Global site parameters",
+  "displayField": "internal_name",
+  "fields": [
+    {
+      "id": "internal_name",
+      "name": "Internal name",
+      "type": "Symbol",
+      "localized": false,
+      "required": true,
+      "validations": [],
+      "disabled": false,
+      "omitted": false
+    },
+    {
+      "id": "title",
+      "name": "SEO > Page title",
+      "type": "Symbol",
+      "localized": true,
+      "required": false,
+      "validations": [],
+      "disabled": false,
+      "omitted": false
+    },
+    {
+      "id": "site_name",
+      "name": "SEO > Site name",
+      "type": "Symbol",
+      "localized": true,
+      "required": false,
+      "validations": [],
+      "disabled": false,
+      "omitted": false
+    },
+    {
+      "id": "default_share_image",
+      "name": "SEO > Default share image",
+      "type": "Link",
+      "localized": false,
+      "required": false,
+      "validations": [
+        {
+          "linkMimetypeGroup": ["image"]
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "linkType": "Asset"
+    },
+    {
+      "id": "home",
+      "name": "Home page",
+      "type": "Link",
+      "localized": false,
+      "required": true,
+      "validations": [
+        {
+          "linkContentType": ["t-page"]
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "linkType": "Entry"
+    },
+    {
+      "id": "main_menu",
+      "name": "Menu > Main",
+      "type": "Link",
+      "localized": false,
+      "required": false,
+      "validations": [
+        {
+          "linkContentType": ["c-menu"]
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "linkType": "Entry"
+    },
+    {
+      "id": "meta_menu",
+      "name": "Menu > Meta",
+      "type": "Link",
+      "localized": false,
+      "required": false,
+      "validations": [
+        {
+          "linkContentType": ["c-menu"]
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "linkType": "Entry"
+    },
+    {
+      "id": "social_menu",
+      "name": "Menu > Social",
+      "type": "Link",
+      "localized": false,
+      "required": false,
+      "validations": [
+        {
+          "linkContentType": ["c-menu"]
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "linkType": "Entry"
+    },
+    {
+      "id": "footer_menus",
+      "name": "Menu > Footer",
+      "type": "Array",
+      "localized": false,
+      "required": false,
+      "validations": [
+        {
+          "size": {
+            "max": 4
+          }
+        }
+      ],
+      "disabled": false,
+      "omitted": false,
+      "items": {
+        "type": "Link",
+        "validations": [
+          {
+            "linkContentType": ["c-menu"]
+          }
+        ],
+        "linkType": "Entry"
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@
     "@contentful/react-apps-toolkit": "1.2.16",
     "contentful-management": "10.46.4",
     "emotion": "10.0.27",
+    "openai": "^4.47.1",
     "react": "18.3.1",
     "react-dom": "18.3.1"
   },
