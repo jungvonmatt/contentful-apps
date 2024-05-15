@@ -1,6 +1,7 @@
-import { EditorAppSDK } from '@contentful/app-sdk';
-import { Paragraph } from '@contentful/f36-components';
-import { /* useCMA, */ useSDK } from '@contentful/react-apps-toolkit';
+import { EditorAppSDK } from "@contentful/app-sdk";
+import { Heading } from "@contentful/f36-components";
+import { WorkbenchContent } from "@contentful/f36-workbench";
+import { /* useCMA, */ useSDK } from "@contentful/react-apps-toolkit";
 
 const Entry = () => {
   const sdk = useSDK<EditorAppSDK>();
@@ -9,8 +10,13 @@ const Entry = () => {
      If it is not needed, you can remove the next line.
   */
   // const cma = useCMA();
+  const contentType = "Settings";
 
-  return <Paragraph>Hello Entry Editor Component (AppId: {sdk.ids.app})</Paragraph>;
+  return (
+    <WorkbenchContent type="default">
+      <Heading as="h1">Documentation for {contentType}</Heading>
+    </WorkbenchContent>
+  );
 };
 
 export default Entry;

@@ -25,6 +25,8 @@
   "devDependencies": {
     "@commitlint/cli": "^15.0.0",
     "@commitlint/config-conventional": "^15.0.0",
+    "@types/react": "^18.3.2",
+    "@types/react-dom": "^18.3.0",
     "commitizen": "^4.2.4",
     "git-cz": "^4.8.0",
     "lerna": "^4.0.0",
