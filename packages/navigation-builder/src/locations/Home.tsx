@@ -1,5 +1,4 @@
-import { Heading, Paragraph, TextLink } from "@contentful/f36-components";
-import { ExternalLinkIcon } from "@contentful/f36-icons";
+import { Heading, Paragraph } from "@contentful/f36-components";
 
 import { WorkbenchContent } from "@contentful/f36-workbench";
 
@@ -27,15 +26,6 @@ const Home = () => {
       <Heading as="h2">Usage</Heading>
       <Paragraph>
         You can find the 'Navigation Builder' tab under navigation content type.
-        <TextLink
-          icon={<ExternalLinkIcon />}
-          alignIcon="end"
-          href="https://app.contentful.com/spaces/kuie7ww395uo/environments/navigation-builder/entries/0hX5lqko9AAUFGhaJXrEG?isNewEntry=true"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Example
-        </TextLink>
       </Paragraph>
     </WorkbenchContent>
   );

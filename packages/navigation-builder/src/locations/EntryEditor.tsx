@@ -1,33 +1,73 @@
 import { WorkbenchContent } from "@contentful/f36-workbench";
+import { ListBox } from "primereact/ListBox";
 import { Tree } from "primereact/tree";
 import { useEffect, useState } from "react";
-import { NodeService } from "../service/NodeService";
 // theme
 import { useFieldValue } from "@contentful/react-apps-toolkit";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
-import { TreeNode } from "primereact/treenode";
+import { filterPages, getAllPages, Page, removeFromArray } from "../utils/page";
 import styles from "./EntryEditor.module.scss";
 
 const Entry = () => {
-  const [nodes, setNodes] = useState<TreeNode[]>([]);
-  const [, setNavigation] = useFieldValue("navigation");
+  const [navigation, setNavigation] = useFieldValue<Page[]>("navigation");
+  const [pages, setPages] = useState<Page[]>([]);
 
   useEffect(() => {
-    NodeService.getTreeNodes().then((data) => setNodes(data));
+    getAllPages().then((result) => {
+      const filteredPages = filterPages(result, navigation);
+      setPages(filteredPages);
+    });
   }, []);
 
   useEffect(() => {
-    setNavigation(nodes);
-  }, [nodes]);
+    if (!Array.isArray(navigation)) setNavigation([]);
+  }, [navigation]);
+
+  const addNavigation = (page: Page) => {
+    const newPages = removeFromArray(page, pages);
+    setPages(newPages);
+    setNavigation([...(navigation || []), page]);
+  };
+
+  const removeNavigation = (page: Page) => {
+    setPages([...pages, page]);
+  };
+
+  const nodeTemplate = (page: Page) => {
+    const { label, slug } = page;
+    return (
+      <div className={styles.navItem}>
+        <div className={styles.text}>
+          <span>{label}</span>
+          <small>{slug}</small>
+        </div>
+        {/* <IconButton
+          size="small"
+          variant="transparent"
+          icon={<CloseIcon size="tiny" className={styles.delete} />}
+          aria-label="Remove navigation"
+          onClick={() => removeNavigation(page)}
+        /> */}
+      </div>
+    );
+  };
 
   return (
-    <WorkbenchContent type="default" className={styles.container}>
-      <div className="card flex justify-content-center">
+    <WorkbenchContent type="default">
+      <div className={styles.wrapper}>
         <Tree
-          value={nodes}
-          dragdropScope="demo"
-          onDragDrop={(e) => setNodes(e.value)}
-          className={styles.container}
+          value={navigation}
+          dragdropScope="navigation"
+          onDragDrop={(e) => setNavigation(e.value as Page[])}
+          className={styles.navigation}
+          nodeTemplate={nodeTemplate}
+        />
+        <ListBox
+          filter
+          onChange={(e) => addNavigation(e.value)}
+          options={pages}
+          optionLabel="label"
+          className={styles.filter}
         />
       </div>
     </WorkbenchContent>
