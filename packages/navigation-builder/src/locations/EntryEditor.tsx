@@ -29,11 +29,11 @@ const Entry = () => {
     setNavigation([...(navigation || []), page]);
   };
 
-  const removeNavigation = (page: Page) => {
-    setPages([...pages, page]);
-  };
+  // const removeNavigation = (page: Page) => {
+  //   setPages([...pages, page]);
+  // };
 
-  const nodeTemplate = (page: Page) => {
+  const nodeTemplate = (page: any) => {
     const { label, slug } = page;
     return (
       <div className={styles.navItem}>

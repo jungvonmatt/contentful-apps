@@ -6,6 +6,12 @@ export type Page = {
   key: string;
   children?: Page[];
 };
+export type NavigationContent = {
+  fields: {
+    title: string;
+    slug: string;
+  };
+};
 
 export const getAllPages = async () => {
   const client = createClient({
@@ -16,10 +22,10 @@ export const getAllPages = async () => {
   const result = await client.getEntries({
     content_type: "t-page",
   });
-  return formatPages(result.items);
+  return formatPages(result.items as unknown as NavigationContent[]);
 };
 
-export const formatPages = (pages: any): Page[] => {
+export const formatPages = (pages: NavigationContent[]): Page[] => {
   return pages.map(({ fields }) => {
     const { title, slug } = fields;
     return {
@@ -41,7 +47,7 @@ export const mapUsedSlugs = (navigation: Page[]) => {
   }, []);
 };
 
-export const filterPages = (usedPages: any, navigation: any[] = []) => {
+export const filterPages = (usedPages: Page[], navigation: any[] = []) => {
   const usedSlugs = mapUsedSlugs(navigation);
   return usedPages.filter(({ slug }) => !usedSlugs.includes(slug));
 };
