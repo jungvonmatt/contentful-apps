@@ -20,7 +20,7 @@ export const getAllPages = async () => {
   });
 
   const result = await client.getEntries({
-    content_type: "t-page",
+    content_type: import.meta.env.VITE_REACT_APP_CONTENT_TYPE,
   });
   return formatPages(result.items as unknown as NavigationContent[]);
 };

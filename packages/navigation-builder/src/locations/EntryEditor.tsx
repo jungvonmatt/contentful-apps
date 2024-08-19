@@ -3,6 +3,8 @@ import { ListBox } from "primereact/ListBox";
 import { Tree } from "primereact/tree";
 import { useEffect, useState } from "react";
 // theme
+// import { IconButton } from "@contentful/f36-components";
+// import { CloseIcon } from "@contentful/f36-icons";
 import { useFieldValue } from "@contentful/react-apps-toolkit";
 import "primereact/resources/themes/lara-light-cyan/theme.css";
 import { filterPages, getAllPages, Page, removeFromArray } from "../utils/page";
