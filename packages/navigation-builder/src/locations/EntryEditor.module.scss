@@ -1,0 +1,41 @@
+.wrapper {
+  display: flex;
+  gap: 2rem;
+  width: 100%;
+}
+.navigation {
+  height: 100%;
+  flex-grow: 1;
+
+  ul {
+    display: flex;
+  }
+
+  ul[role="group"] {
+    flex-direction: column;
+  }
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+
+  small {
+    color: rgb(192, 192, 192);
+  }
+}
+
+.delete {
+  fill: rgb(152, 9, 9) !important;
+}
+
+.filter {
+  height: 100%;
+}
+
